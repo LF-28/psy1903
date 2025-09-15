@@ -44,3 +44,6 @@ let courseName = 'Programming for Psychologists';
 console.log(courseName.toUpperCase());
 console.log(courseName.indexOf("Psychologists")); // 16
 console.log(courseName.replace("Programming", "Coding"));
+
+// practice exercises
+console.log(5 == 5 && 10 > 1);
