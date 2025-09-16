@@ -22,4 +22,8 @@ form.addEventListener('submit', function (event) {
     }
     // Report the results
     results.innerHTML = resultsMessage;
+
+    //How to hide content
+    form.style.display = 'none';
+
 });
