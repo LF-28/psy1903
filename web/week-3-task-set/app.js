@@ -54,13 +54,22 @@ alert(feedback + ' The expected answer is ' + correctAnswer + '.');
  */
 
 
-let age = prompt('How old are you?');
+//Display alerts based on age
+/* let age = prompt('How old are you?');
 if (age < 12) {
     alert('Child');
 }
-if (age < 18 && age >= 12) {
+else if (age < 18 && age >= 12) {
     alert('Teenager');
 }
-if (age >= 18) {
+else (age >= 18) {
     alert('Adult');
-}
+} */
+
+//Display if even or odd numbered entered
+let number = prompt("Please enter a whole number");
+if (number % 2 == 0) {
+    alert("The number you entered was even")
+} else {
+    alert("The number you entered is odd.")
+}; 
