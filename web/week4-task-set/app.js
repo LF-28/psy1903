@@ -33,18 +33,42 @@
 
 //Q5
 
-let words = ['apple', 'banana', 'cherry', 'pear', 'grape'];
+// let words = ['apple', 'banana', 'cherry', 'pear', 'grape'];
 
-function getLongestWord(words) {
-    let longestWord = ""
-    for (let word of words) {
-        if (word.length > longestWord.length) {
-            longestWord = word;
+// function getLongestWord(words) {
+//     let longestWord = ""
+//     for (let word of words) {
+//         if (word.length > longestWord.length) {
+//             longestWord = word;
 
+//         }
+//     }
+//     return longestWord
+
+// }
+
+// console.log(getLongestWord(words)); // Expected output: banana
+
+//Q6
+
+function getOddNumbers(numbers) {
+    let results = []
+    for (let number of numbers) {
+        if (number % 2 != 0) {
+            results.push(number);
         }
-    }
-    return longestWord
-
+    } return results
 }
+console.log(getOddNumbers([1, 2, 3, 4, 5])); // Expected output: [1, 3, 5]
+console.log(getOddNumbers([12, 45, 10, 11, 61])); // Expected output: [45, 11, 61]
 
-console.log(getLongestWord(words)); // Expected output: banana
+// let results = []
+// function getOddNumbers(numbers) {
+//     for (let numbe) {
+//         if (number % 2 == 0) {
+//             results.push(numbers);
+//         }
+//     }
+// }
+// console.log(getOddNumbers([1, 2, 3, 4, 5])); // Expected output: [1, 3, 5]
+// console.log(getOddNumbers([12, 45, 10, 11, 61])); // Expected output: [45, 11, 61]
