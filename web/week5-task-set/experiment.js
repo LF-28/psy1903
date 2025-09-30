@@ -6,7 +6,8 @@ let welcomeTrial = {
     type: jsPsychHtmlKeyboardResponse,
     stimulus: `
     <h1>Welcome to the Math Response Time Task!</h1> 
-    <p>In this experiment, you will be shown a series of characters and asked to categorize whether the characters make up a word or not.</p>
+    <p>In this experiment, you will be shown a series of math questions.</p>
+    <p>Please answer as quickly and accurately as possible.</p>
     <p>Press SPACE to begin the first part.</p>
     `,
 
@@ -15,20 +16,37 @@ let welcomeTrial = {
 };
 timeline.push(welcomeTrial);
 
-let ageTrial = {
-    type: jsPsychSurveyHtmlForm,
-    preamble: '<p>How old are you?</p>',
-    html: `<p><input type='text' name='age' id='age'></p>`, //gave it an id becuase saw autofocus in documentation
-    autofocus: 'age', // id of the field we want to auto-focus on when the trial starts so mouse is there
-    button_label: 'Submit Answer',
-    data: {
-        collect: true,
-    },
-    on_finish: function (data) {
-        data.age = data.response.age;
-    } //letting us filter out response data 
-}
-timeline.push(ageTrial);
+
+// Randomize the conditions in this block
+
+for (let condition of conditions) {
+    let mathTrial = {
+        type: jsPsychSurveyHtmlForm,
+        preamble: `<p>what is ${condition.num1} + ${condition.num2} </p>`,
+        html: `<p><input type='text' name='answer' id='answer'></p>`, //gave it an id becuase saw autofocus in documentation
+        autofocus: 'answer', // id of the field we want to auto-focus on when the trial starts so mouse is there
+        button_label: 'Submit Answer',
+        data: {
+            collect: true,
+        },
+        on_finish: function (data) {
+            data.num1 = condition.num1;
+            data.num2 = condition.num2;
+            data.correctAnswer = condition.correctAnswer;
+            data.answer = data.response.answer;
+            if (data.answer == condition.correctAnswer) {
+                data.correct = true;
+            } else {
+                data.correct = false;
+            }
+
+
+
+        }//letting us filter out response data 
+    };
+
+    timeline.push(mathTrial);
+};
 
 // Debrief
 let debriefTrial = {
@@ -46,8 +64,8 @@ let debriefTrial = {
             .csv();
         console.log(data);
     }
-}
+};
 timeline.push(debriefTrial);
 
 
-jsPsych.run(timeline);
+jsPsych.run(timeline); 
