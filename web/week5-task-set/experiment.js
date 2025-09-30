@@ -19,13 +19,14 @@ timeline.push(welcomeTrial);
 
 // Randomize the conditions in this block
 
+
 for (let condition of conditions) {
+    let choices = [condition.correctAnswer, condition.altAnswer];
+    choices = jsPsych.randomization.repeat(choices, 1);
     let mathTrial = {
-        type: jsPsychSurveyHtmlForm,
-        preamble: `<p>what is ${condition.num1} + ${condition.num2} </p>`,
-        html: `<p><input type='text' name='answer' id='answer'></p>`, //gave it an id becuase saw autofocus in documentation
-        autofocus: 'answer', // id of the field we want to auto-focus on when the trial starts so mouse is there
-        button_label: 'Submit Answer',
+        type: jsPsychHtmlButtonResponse,
+        stimulus: `<p>What is ${condition.num1} + ${condition.num2} </p>`,
+        choices: choices,
         data: {
             collect: true,
         },
@@ -33,8 +34,11 @@ for (let condition of conditions) {
             data.num1 = condition.num1;
             data.num2 = condition.num2;
             data.correctAnswer = condition.correctAnswer;
-            data.answer = data.response.answer;
-            if (data.answer == condition.correctAnswer) {
+            data.altAnswer = condition.altAnswer;
+            data.answer = data.response;
+            if (data.answer == 0 && condition.correctAnswer == choices[0]) {
+                data.correct = true;
+            } else if (data.answer == 1 && condition.correctAnswer == choices[1]) {
                 data.correct = true;
             } else {
                 data.correct = false;
