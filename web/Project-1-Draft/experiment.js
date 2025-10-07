@@ -22,11 +22,11 @@ let welcomeTrial = {
 timeline.push(welcomeTrial);
 //Stroop Task
 
-
-for (condition of conditions) {
+let randomWords = jsPsych.randomization.repeat(words, 1);
+for (let item of randomWords) {
     // Create a randomized array of colors
     let colors = jsPsych.randomization.repeat(['red', 'green', 'blue'], 1);
-    randomConditions = jsPsych.randomization.repeat(condition, 1);
+
 
     // Choose the last color from the colors array
     let color = colors.pop();
@@ -35,7 +35,7 @@ for (condition of conditions) {
         choices: ['r', 'g', 'b'],
         // Dynamically set the class based on our randomly chosen color
         stimulus: `
-            <span class='${color}'>${condition}</span>`
+            <span class='${color}'>${item.word}</span>`
         ,
     }
     timeline.push(stroopTrial);
