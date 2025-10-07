@@ -35,6 +35,8 @@ for (let condition of conditions) {
             data.correctAnswer = condition.correctAnswer;
             data.altAnswer = condition.altAnswer;
             data.answer = data.response;
+            //console.log(data.response);
+            //data.answer = choices[data.response];
             if (data.answer == 0 && condition.correctAnswer == choices[0]) {
                 data.correct = true;
             } else if (data.answer == 1 && condition.correctAnswer == choices[1]) {
@@ -42,6 +44,7 @@ for (let condition of conditions) {
             } else {
                 data.correct = false;
             }
+            //this could be data.correct = choices[data.response] == condition.correctAnswer;
 
 
 
