@@ -10,7 +10,7 @@ let words = [
     { word: 'ship', valence: 'neutral' },
     { word: 'lake', valence: 'neutral' },
     { word: 'idea', valence: 'neutral' },
-    { word: 'ile', valence: 'neutral' },
+    { word: 'vile', valence: 'neutral' },
     { word: 'pain', valence: 'threatening' },
     { word: 'fear', valence: 'threatening' },
     { word: 'hate', valence: 'threatening' },
@@ -21,17 +21,3 @@ let words = [
     { word: 'died', valence: 'threatening' },
     { word: 'rage', valence: 'threatening' },
 ];
-
-
-
-
-// let conditions = {
-//     neutralWords: ['cube', 'read', 'boat', 'tree', 'land', 'city', 'ship', 'lake', 'idea', 'mile'],
-//     threateningWords: ['vile', 'pain', 'fear', 'hate', 'kill', 'hell', 'evil', 'bomb', 'died', 'rage'],
-// };
-
-// let conditions = initJsPsych().randomization.repeat(words, 20);
-
-
-// Output the resulting conditions array to make sure it is set up correctly
-console.log(words);

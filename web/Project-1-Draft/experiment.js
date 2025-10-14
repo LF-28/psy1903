@@ -1,6 +1,21 @@
 let jsPsych = initJsPsych();
 let timeline = [];
+//Consent trial 
+let consentTrial = {
+    type: jsPsychHtmlKeyboardResponse,
+    stimulus: `
+    <h1> <span class = 'heading'>Welcome to the Emotional Stroop Task! </span></h1>
+    <p>Welcome!
+<p>The experiment you are about to complete is an educational exercise designed for PSY 1903: Programming for Psychological Scientists</em>; it is not intended as a true scientific experiment.</p>
+<p>No identifying information will be collected, data will not be shared beyond our class, and your participation is completely voluntary.</p>
+<p>If you have any questions, please reach out to Dr. Garth Coombs (garthcoombs@fas.harvard.edu), one of the head instructors of PSY 1903.</p>
+<p>If you agree to participate, press SPACE to continue.</p>
+    `,
 
+    choices: [' '],
+
+};
+timeline.push(consentTrial);
 //Welcome Trial
 let welcomeTrial = {
     type: jsPsychHtmlKeyboardResponse,
@@ -37,6 +52,12 @@ for (let item of randomWords) {
         stimulus: `
             <span class='${color}'>${item.word}</span>`
         ,
+        data: {
+            collect: true,
+            valence: item.valence,
+            word: item.word,
+            color: color
+        }
     }
     timeline.push(stroopTrial);
 };
@@ -44,62 +65,62 @@ for (let item of randomWords) {
 
 
 
-//Results Trial
+// Results Trial
 
-// let resultsTrial = {
-//     type: jsPsychHtmlKeyboardResponse,
-//     choices: ['NO KEYS'],
-//     async: false,
-//     stimulus: function () {
-//         return `
-//                 <h1>Please wait...</h1>
-//                 <span class='loader'></span>
-//                 <p>We are saving the results of your inputs.</p>
-//             `;
-//     },
-//     on_start: function () {
-//         //  ⭐ Update the following three values as appropriate ⭐
-//         let prefix = 'emotional-stroop-task';
-//         let dataPipeExperimentId = 'your-experiment-id-here';
-//         let forceOSFSave = false;
+let resultsTrial = {
+    type: jsPsychHtmlKeyboardResponse,
+    choices: ['NO KEYS'],
+    async: false,
+    stimulus: function () {
+        return `
+                <h1>Please wait...</h1>
+                <span class='loader'></span>
+                <p>We are saving the results of your inputs.</p>
+            `;
+    },
+    on_start: function () {
+        //  ⭐ Update the following three values as appropriate ⭐
+        let prefix = 'emotional-stroop-task';
+        let dataPipeExperimentId = 'your-experiment-id-here';
+        let forceOSFSave = false;
 
-//         // Filter and retrieve results as CSV data
-//         let results = jsPsych.data
-//             .get()
-//             .filter({ collect: true })
-//             .ignore([])
-//             .csv();
+        // Filter and retrieve results as CSV data
+        let results = jsPsych.data
+            .get()
+            .filter({ collect: true })
+            .ignore(['collect', 'trial_type', 'trial_index', 'plugin_version', 'stimulus',])
+            .csv();
 
-//         // Generate a participant ID based on the current timestamp
-//         let participantId = new Date().toISOString().replace(/T/, '-').replace(/\..+/, '').replace(/:/g, '-');
+        // Generate a participant ID based on the current timestamp
+        let participantId = new Date().toISOString().replace(/T/, '-').replace(/\..+/, '').replace(/:/g, '-');
 
-//         // Dynamically determine if the experiment is currently running locally or on production
-//         let isLocalHost = window.location.href.includes('localhost');
+        // Dynamically determine if the experiment is currently running locally or on production
+        let isLocalHost = window.location.href.includes('localhost');
 
-//         let destination = '/save';
-//         if (!isLocalHost || forceOSFSave) {
-//             destination = 'https://pipe.jspsych.org/api/data/';
-//         }
+        let destination = '/save';
+        if (!isLocalHost || forceOSFSave) {
+            destination = 'https://pipe.jspsych.org/api/data/';
+        }
 
-//         // Send the results to our saving end point
-//         fetch(destination, {
-//             method: 'POST',
-//             headers: {
-//                 'Content-Type': 'application/json',
-//                 Accept: '*/*',
-//             },
-//             body: JSON.stringify({
-//                 experimentID: dataPipeExperimentId,
-//                 filename: prefix + '-' + participantId + '.csv',
-//                 data: results,
-//             }),
-//         }).then(data => {
-//             console.log(data);
-//             jsPsych.finishTrial();
-//         })
-//     }
-// }
-// timeline.push(resultsTrial);
+        // Send the results to our saving end point
+        fetch(destination, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                Accept: '*/*',
+            },
+            body: JSON.stringify({
+                experimentID: dataPipeExperimentId,
+                filename: prefix + '-' + participantId + '.csv',
+                data: results,
+            }),
+        }).then(data => {
+            console.log(data);
+            jsPsych.finishTrial();
+        })
+    }
+}
+timeline.push(resultsTrial);
 
 //Debrief Trial
 
@@ -113,6 +134,14 @@ let debriefTrial = {
     <p>Thank you again for your time. You can now close this tab. </p>
     `,
     choices: ['NO KEYS'],
+    on_start: function () {
+        let data = jsPsych.data
+            .get()
+            .filter({ collect: true })
+            .ignore(['collect', 'trial_type', 'trial_index', 'plugin_version', 'stimulus',])
+            .csv();
+        console.log(data);
+    }
 };
 timeline.push(debriefTrial);
 
