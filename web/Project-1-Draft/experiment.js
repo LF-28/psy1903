@@ -81,7 +81,7 @@ let resultsTrial = {
     on_start: function () {
         //  ⭐ Update the following three values as appropriate ⭐
         let prefix = 'emotional-stroop-task';
-        let dataPipeExperimentId = 'your-experiment-id-here';
+        let dataPipeExperimentId = 'lWnpUKzBlZJ2';
         let forceOSFSave = false;
 
         // Filter and retrieve results as CSV data
