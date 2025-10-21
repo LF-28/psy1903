@@ -27,7 +27,7 @@ let welcomeTrial = {
     <p>Press the <span class = 'key'>R</span> key if the text is red.</p>
     <p>Press the <span class = 'key'>G</span> key if the text is green.</p>
     <p>Press the <span class = 'key'>B</span> key if the text is blue.</p>
-    <p>Please try to respond both <span class = 'bold'>quickly</span> and <span class = 'bold'>accurately </span>.</p>
+    <p>Please try to respond both <span class = 'bold'>quickly</span> and <span class = 'bold'>accurately </span>. If you don't respond quickly enough, the trial will be counted as missed.</p>
     <p>Press <span class='key'>SPACE</span> to begin.</p>
     `,
 
@@ -35,6 +35,74 @@ let welcomeTrial = {
 
 };
 timeline.push(welcomeTrial);
+
+//Practice Trial 
+
+
+for (let item of practice) {
+    let colors = jsPsych.randomization.repeat(['red', 'green', 'blue'], 1);
+    let color = colors.pop();
+    let practiceTrial = {
+        type: jsPsychHtmlKeyboardResponse,
+        stimulus: `
+    <span class='${color}'>${item.example}</span>
+    `,
+        prompt: `<p>The following three trials are meant to be a practice trial. You will get feedback if you answer incorrectly. The main trial will begin after you complete these.</p>`,
+        data: {
+            collect: false,
+            example: item.example,
+            color: color,
+        },
+        on_finish: function (data) {
+            if (data.response == 'r' && color == 'red') {
+                data.correct = true;
+            } else if (data.response == 'g' && color == 'green') {
+                data.correct = true;
+            } else if (data.response == 'b' && color == 'blue') {
+                data.correct = true;
+            }
+            else {
+                data.correct = false
+            }
+            if (data.response == 'r' || data.response == 'g' || data.response == 'b') {
+                data.missed = false;
+            }
+            else {
+                data.missed = true;
+            }
+        }
+    }
+    timeline.push(practiceTrial)
+    //Feedback
+    let feedbackTrial = {
+        type: jsPsychHtmlKeyboardResponse,
+        stimulus: `<h1>Incorrect</h1>`,
+        trial_duration: 1000,
+        choices: ['NO KEY'],
+        on_load: function () {
+            let lastTrialData = jsPsych.data.getLastTrialData().values()[0];
+            if (lastTrialData.correct) {
+                // Force skip this feedback trial if they got the previous trial correct
+                jsPsych.finishTrial();
+            }
+        },
+    }
+    timeline.push(feedbackTrial)
+}
+
+//Message Before Real Task
+let intermediateTrial = {
+    type: jsPsychHtmlKeyboardResponse,
+    stimulus: `
+    <p>The real task will now begin. Please keep in mind you should respond as quickly and accurately as possible.</p>
+    <p>Press <span class='key'>SPACE</span> to begin.</p>
+    `,
+
+    choices: [' '],
+
+};
+timeline.push(intermediateTrial);
+
 //Stroop Task
 
 let randomWords = jsPsych.randomization.repeat(words, 1);
@@ -52,14 +120,34 @@ for (let item of randomWords) {
         stimulus: `
             <span class='${color}'>${item.word}</span>`
         ,
+        trial_duration: 2000,
         data: {
             collect: true,
             valence: item.valence,
             word: item.word,
-            color: color
+            color: color,
+        },
+        //checking to see if their response is correct
+        on_finish: function (data) {
+            if (data.response == 'r' && color == 'red') {
+                data.correct = true;
+            } else if (data.response == 'g' && color == 'green') {
+                data.correct = true;
+            } else if (data.response == 'b' && color == 'blue') {
+                data.correct = true;
+            }
+            else {
+                data.correct = false
+            }
+            if (data.response == 'r' || data.response == 'g' || data.response == 'b') {
+                data.missed = false;
+            }
+            else {
+                data.missed = true;
+            }
         }
     }
-    timeline.push(stroopTrial);
+    timeline.push(stroopTrial)
 };
 
 
@@ -138,7 +226,7 @@ let debriefTrial = {
         let data = jsPsych.data
             .get()
             .filter({ collect: true })
-            .ignore(['collect', 'trial_type', 'trial_index', 'plugin_version', 'stimulus',])
+            .ignore(['example', 'collect', 'trial_type', 'trial_index', 'plugin_version', 'stimulus',])
             .csv();
         console.log(data);
     }
