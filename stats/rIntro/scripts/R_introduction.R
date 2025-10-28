@@ -37,6 +37,74 @@ summary(mydata)   # Get a summary of each column
 
 mydata$moodGroup <- as.factor(mydata$moodGroup)
 str(mydata)
+# Create sample data
+subject_id <- 1:20
+rt <- c(470, 360, 665, 400, 445, 270, 500, 565, 350, 445, 275, NA, 600, 290, 560, 375, 450, 480, 325, 430)
+congruent <- c(TRUE, TRUE, FALSE, TRUE, FALSE, TRUE, FALSE, FALSE, TRUE, TRUE, TRUE, FALSE, FALSE, TRUE, TRUE, FALSE, TRUE, FALSE, TRUE, FALSE)
+color <- c("red", "blue", "blue", "green", "red", "red", "blue", "green", "blue", "green", "red", "blue", "green", "blue", "green", "red", "blue", "blue", "green", "red")
+
+# Combine into data frame
+data <- data.frame(subject_id, rt, congruent, color)
+
+# Inspect
+head(data)    # Displays the top 6 observations — great for checking that your data imported or assigned correctly.
+tail(data)    # Displays the bottom 6 observations — useful for confirming structure and missing values at the end.
+mean(data$rt) # Without na.rm = TRUE, mean() returns NA because R doesn’t ignore missing values by default.
+mean(data$rt, na.rm=TRUE) # This tells R to remove any missing values before calculating the mean. Calculates mean of all RT's = 434.47ms
+summary(data) # Displays descriptive statistics for each variable (column) in the dataframe.
+str(data)     # Displays the structure of the dataframe — its dimensions, variable types, and a sample of values.
+
+nums <- c(5, 10, 15, 20)
+nums[c(TRUE, FALSE, TRUE, FALSE)]  # selects 5 and 15
+nums[nums > 10]                    # selects elements greater than 10
 
 
+df <- data.frame(
+  id = 1:4,
+  name = c("Alice", "Bob", "Carmen", "Diego"),
+  score = c(88, 92, 95, 90)
+)
+
+df[1, ]       # selects the first row (all columns)
+df[, 2]       # selects the second column (all rows)
+df[1:2, c(1, 3)]  # selects rows 1–2 and columns 1 and 3
+df[-1, ]   # all rows except the first
+df[, -2]   # all columns except the second
+
+df$name       # returns the 'name' column as a vector
+df$score      # returns the 'score' column as a vector
+df[, "score"] # identical result
+
+df[, "score", drop = FALSE]
+
+col_to_access <- "score"
+df[[col_to_access]]   # same as df$score
+
+df[df$score > 90, ]      # rows where score is greater than 90
+df[df$name == "Alice", ] # rows where name is Alice
+
+df[df$score > 90 & df$id < 4, ]
+
+df$passed <- df$score >= 90
+df
+
+new_row <- data.frame(id = 5, name = "Eva", score = 93, passed = TRUE)
+df <- rbind(df, new_row)
+
+
+columns_to_keep <- c("id", "score")
+df[, columns_to_keep]
+
+
+congruent_trials <- data[data$congruent == TRUE, ]
+fast_trials <- data[data$rt < 500, ]
+fast_congruent <- data[data$congruent == TRUE & data$rt < 500, ]
+
+mean(data[data$congruent == TRUE, "rt"], na.rm = TRUE)
+mean(data[data$congruent == FALSE, "rt"], na.rm = TRUE)
+sum(!is.na(data$rt))
+mean(data[data$color == "blue", "rt"], na.rm = TRUE)
+mean(data[data$color == "red", "rt"], na.rm = TRUE)
+
+subset_cols <- data[, c("subject_id", "rt", "congruent")]
 
