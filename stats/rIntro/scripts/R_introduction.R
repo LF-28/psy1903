@@ -108,3 +108,7 @@ mean(data[data$color == "red", "rt"], na.rm = TRUE)
 
 subset_cols <- data[, c("subject_id", "rt", "congruent")]
 
+setwd("~/Desktop/psy1903/")
+dir.create("r_foundations_practice")
+setwd("~/Desktop/psy1903/r_foundations_practice")
+getwd()
