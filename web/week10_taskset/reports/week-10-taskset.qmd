@@ -19,3 +19,28 @@ head(experiment_data)
 ## Check the structure of the dataset
 str(experiment_data)
 ```
+
+#### Q2: Functions ------------------------------------------------
+
+```{r}
+## Generate one or more random numbers between min and max (defaults: one number between 1–10)
+getRandomNumber <- function(min = 1, max = 10, number = 1) {
+  sample(min:max, number)
+}
+```
+######Classify RT Function ----------------------------------
+
+```{r}
+## Classify reaction times into "Fast", "Slow", or "Unknown" (default threshold = 500ms)
+experiment_data$rt_category_vector <- NA
+classify_rt <- function(rt, threshold = 500) {
+   ifelse(
+    is.na(rt), "Unknown",              # If RT is missing
+    ifelse(experiment_data$rt < threshold, "Fast", "Slow")   # Otherwise, check Fast vs Slow
+)
+}
+experiment_data$rt_category_vector<- classify_rt(experiment_data$rt, 500)
+```
+
+
+
