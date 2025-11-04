@@ -1,0 +1,32 @@
+---
+title: "Week 10 Debugging and Refactoring"
+author: "Eliza"
+format: html
+execute:
+  echo: true
+  warning: true
+  message: true
+---
+
+```{r}
+iat_data_summary <- summary(iat_data)
+
+```
+
+```{r}
+calculate_group_means <- function(data) {
+  #browser()  # Pause here to explore
+   # BUG: using rt instead of data$rt
+  result <- tapply(data$rt, data$condition, mean, na.rm = TRUE)
+  return(result)
+}
+
+calculate_group_means(iat_data)
+# Error in tapply(rt, data$condition, mean, na.rm = TRUE) : 
+#   arguments must have same length
+```
+Comparing Loop vs Vectroized Version
+```{r}
+
+```
+
