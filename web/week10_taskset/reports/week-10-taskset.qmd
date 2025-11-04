@@ -29,18 +29,136 @@ getRandomNumber <- function(min = 1, max = 10, number = 1) {
 }
 ```
 ######Classify RT Function ----------------------------------
+```{r}
+experiment_data$rt_category_vector <- NULL
+experiment_data
+```
 
 ```{r}
 ## Classify reaction times into "Fast", "Slow", or "Unknown" (default threshold = 500ms)
 experiment_data$rt_category_vector <- NA
 classify_rt <- function(rt, threshold = 500) {
+ if (!is.numeric(rt)) {
+    stop("Error:'rt' must be numeric.")
+  }
+   if (!is.numeric(threshold) || length(threshold) != 1) {
+    stop("Error: 'threshold' must be a single numeric value.")
+  }
    ifelse(
     is.na(rt), "Unknown",              # If RT is missing
-    ifelse(experiment_data$rt < threshold, "Fast", "Slow")   # Otherwise, check Fast vs Slow
+    ifelse(rt < threshold, "Fast", "Slow")   # Otherwise, check Fast vs Slow
 )
 }
 experiment_data$rt_category_vector<- classify_rt(experiment_data$rt, 500)
 ```
+####Q3: Loops vs. Vectorization -----------------------------
+####Question 3.1 New Columns
+```{r}
+experiment_data$age <- NA
+```
+###Q3.2 Loop Version
+```{r}
+for (i in 1:nrow(experiment_data)) {
+  experiment_data[i, "age"]<- getRandomNumber(18,65, 1)
+}
+head(experiment_data)
+```
+####Q3.3 Vectorized Version
+```{r}
+experiment_data$age <-sample(18:65, replace = TRUE, nrow(experiment_data))
+head(experiment_data)
+
+```
+####Q4: Control Structures on Data Frames ---------------------------
+##Q4.1 Loop
+```{r}
+experiment_data$rt_category_loop <- NA
+for (i in 1:nrow(experiment_data)) {
+  experiment_data[i, "rt_category_loop"] <- classify_rt(experiment_data[i, "rt"], 500) ##a loop using classify function to categorize rt as fast, slow, or unknown
+}
+```
+###Q4.2 Vectorized Version
+```{r}
+experiment_data$rt_category_vec <- classify_rt(experiment_data$rt, threshold = 500) #fill column with vecotrized version and classify_rt function
+```
+##Q4.3
+```{r}
+table(loop = experiment_data$rt_category_loop,
+      vec  = experiment_data$rt_category_vec,
+      useNA = "ifany")
+```
+#### Q5: Debugging Functions -----------------------------
+###Q5.1 Create Buggy Function
+```{r}
+## Create Buggy Function
+
+
+flag_fast <- function(rt_vector, threshold = 500) {
+   #threshold defined inside the function so it is local, as an argument
+  rt_vector < threshold
+}
+flag_fast(experiment_data$rt)
+
+```
+##Q5.2 Reveal the Bug
+```{r}
+rm(threshold)
+flag_fast(experiment_data$rt)
+```
+#### Q6: Debugging Tools in Action -----------------------------
+####Q6.1 Reproduce the Issue
+```{r}
+subject_means <- tapply(experiment_data$rt,
+                        experiment_data$condition,
+                        function(x) mean(x, na.rm = TRUE)) #fixing the handling of missing values
+print(paste("Mean for control:", subject_means["control"]))
+print(paste("Mean for incongruent:", subject_means["incongruent"]))
+```
+##Q6.2 Investigate Missingness
+```{r}
+# How many NAs overall?
+sum(is.na(experiment_data$rt))
+
+# How many NAs by condition?
+tapply(is.na(experiment_data$rt), experiment_data$condition, sum)
+
+# Optional: quick sanity checks
+summary(experiment_data$rt)
+with(experiment_data, table(condition, is.na(rt)))
+```
+#### Q7: Using AI for Debugging or Refactoring -----------------------
+##Q7.1 Buggy Code
+```{r}
+# subject_means <- tapply(experiment_data$rt,
+#                         experiment_data$condition,
+#                         mean)
+# print(paste("Mean for control:", subject_means["control"]))
+# print(paste("Mean for incongruent:", subject_means["incongruent"]))
+```
+##Q7.2 Buggy Code Fix
+```{r}
+subject_means <- tapply(experiment_data$rt,
+                        experiment_data$condition,
+                        mean, 
+                        na.rm = TRUE) #fixing the handling of missing values
+print(paste("Mean for control:", subject_means["control"]))
+print(paste("Mean for incongruent:", subject_means["incongruent"]))
+```
+The Ai did a good job of telling me various different reasons, based on the information I gave it, that I might not be getting the output I expected. It was pretty in depth for all the different possoible reasons, becuase it said my code was syntatically right so it was something with my data. It also gave me the ways to check to see what was causing the problem. For what was causing the problem (not ignoring NA values) it said just "Why: You didn’t tell mean() to ignore missing values. You can fix it with mean(..., na.rm = TRUE)." This works, and is less involved than what I had before.It did a good job summarizing potential problems and how to check which one is the cause. It gave simple fixes, without handing me too much code, but I did check it's fix myself and the output.  
+#### Q8: Saving and Reloading Objects -----------------------------
+##Q8.1 Cleaned Dataset
+```{r}
+write.csv(experiment_data, "../data/cleaned/experiment_data.csv", row.names = FALSE) #saving as a csv file
+saveRDS(experiment_data, "../data/cleaned/experiment_data.rds") #saving as a RDS file
+```
+##Q8.2 Multiple Objects
+```{r}
+save(experiment_data, subject_means, file = "../data/cleaned/objects.RData") #save subject_means and data together
+## Clear the environment
+rm(list = ls())
+load("../data/cleaned/objects.RData") #reloading check
+```
+
 
 
 
