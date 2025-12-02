@@ -1,0 +1,47 @@
+---
+title: "Week 11 Task Set"
+author: "Eliza Fried"
+format: html
+execute:
+  echo: true
+  warning: true
+  message: false
+---
+#### Concept Check -------------------------------
++ Q2.1: What does source("scripts/score_questionnaire.R") enable in your workflow?
+    + It allows you to load and run the score_questionnaire R script to use that function in Quarto.
++ Q2.2: Why is modularizing your code into multiple scripts considered a best practice?
+    + It makes your code clearer, more reusable, replicable, and allows it to be scaled up to more files and use functions across       projects. 
++ Q2.3: What information does traceback() provide after an error?
+    + It tells you more information about what the error is and what line is causing the error (call stack from the error).
++ Q2.4: When you read multiple .csv files into R, how can using str() or names() before combining them help you prevent or debug          errors later in your workflow?
+    + It allows you to see if the structure is compatible and there are no mismatches that will cause errors later, like data is        numeric with other data it will be combined with. 
++ Q2.5: When you run source("scripts/process_participant.R") inside your Quarto document, nothing prints in the Console. How can you check whether your function actually loaded correctly into your environment, and why is this step important before calling it in later code?
+    + With ls() you can check what is in your environment . If nothing shows up, you know that it did not load properly into your environment and you have to fix something. This is important because it will cause errors later when you are trying to apply the function and is not there to be called. 
+    
+---
+File List 
+```{r}
+# Prefer a pattern to avoid accidentally pulling other CSVs
+file_list <- list.files(
+  here::here("data", "raw"),
+  pattern = "^est-experiment-.*\\.csv$",
+  full.names = FALSE
+)
+file_list
+```
+#### 2) Apply our participant processor ---------------------------------------
+```{r}
+ source(here::here("scripts/score_questionnaire.R"))
+  source(here::here("scripts/compute_rt_if_missing.R"))
+  source(here::here("scripts/summarize_behavior.R"))
+  source(here::here("scripts/process_participant.R"))
+participant_rows <- lapply(file_list, process_participant)
+
+```
+
+#### 3) Combine into one study-level data frame --------------------------------
+```{r}
+study_level <- do.call(rbind, participant_rows)
+```
+    

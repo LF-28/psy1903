@@ -1,0 +1,139 @@
+---
+title: "Week 11 Task Set"
+author: "Eliza Fried"
+format: html
+execute:
+  echo: true
+  warning: true
+  message: false
+---
+#### Concept Check -------------------------------
++ Q2.1: What does source("scripts/score_questionnaire.R") enable in your workflow?
+    + It allows you to load and run the score_questionnaire R script to use that function in Quarto.
++ Q2.2: Why is modularizing your code into multiple scripts considered a best practice?
+    + It makes your code clearer, more reusable, replicable, and allows it to be scaled up to more files and use functions across       projects. 
++ Q2.3: What information does traceback() provide after an error?
+    + It tells you more information about what the error is and what line is causing the error (call stack from the error).
++ Q2.4: When you read multiple .csv files into R, how can using str() or names() before combining them help you prevent or debug          errors later in your workflow?
+    + It allows you to see if the structure is compatible and there are no mismatches that will cause errors later, like data is        numeric with other data it will be combined with. 
++ Q2.5: When you run source("scripts/process_participant.R") inside your Quarto document, nothing prints in the Console. How can you check whether your function actually loaded correctly into your environment, and why is this step important before calling it in later code?
+    + With ls() you can check what is in your environment . If nothing shows up, you know that it did not load properly into your environment and you have to fix something. This is important because it will cause errors later when you are trying to apply the function and is not there to be called. 
+    
+---
+```{r}
+#### (2) Installation of packages ----------------------------------------------
+
+## Packages are essential toolboxes that you load into R and allow you to do cool things with your data
+## One package called "pacman" makes installing packages very easy...
+
+if (!require("pacman")) {install.packages("pacman"); require("pacman")}  # First install and load in pacman to R
+
+## Then use p_load and a list of all of the packages that you need for the project (with each one being in "quotes")
+
+p_load("tidyverse","rstudioapi","lme4","emmeans","psych","corrplot")  # tidyverse contains many packages like dplyr, tidyr, stringr, and ggplot2, among others, and the additional packages should cover our data manipulations, plotting, and analyses
+```
+
+```{r}
+exp_data <- read.csv("/Users/efried/Desktop/psy1903/web/w11_taskset copy/data/raw/est-experiment-2025-11-05-09-04-45.csv")
+head(exp_data)
+exp_data$correct <- as.logical(exp_data$correct)
+str(exp_data)
+```
+1.	Inspect and clean correct
+	•	Use str() and table() to verify the type and values of correct.
+	•	Convert correct from "true"/"false" strings to logical (TRUE/FALSE).
+	•	Compute:
+	•	Overall mean accuracy (proportion correct, excluding NA),
+	•	Accuracy by block (using tapply() or aggregate()).
+```{r}
+mean(exp_data$correct, na.rm = TRUE)
+mean_accuracy_block <- tapply(exp_data$correct, exp_data$block, mean, na.rm = TRUE) #mean accuracy by block
+mean_accuracy_block
+```
+	
+	2.	Recover missing RTs with timestamps
+	•	Write a function compute_rt_if_missing_vector(data) that:
+	•	If rt is NA and response, stim_onset_ms, and resp_time_ms are all non-missing, sets
+rt <- resp_time_ms - stim_onset_ms.
+	•	Leaves rows unchanged if:
+	•	rt is not NA, or
+	•	response is also NA (true-missing trial), or
+	•	timestamps are missing.
+	•	Uses a vectorized ifelse() approach (no loop).
+	•	Returns the updated data frame.
+```{r}
+compute_rt_if_missing <- function(data) {
+  data$rt <- ifelse( 
+    is.na(data$rt) &
+    !is.na(data$response) &
+    !is.na(data$stim_onset_ms) &
+    !is.na(data$resp_time_ms), data$resp_time_ms - data$stim_onset_ms, data$rt)
+  return(data)
+}
+compute_rt_if_missing(exp_data)
+```
+	
+3.	Summarize behavior with RT filtering
+	•	Write a function summarize_behavior(data, rt_min = 300, rt_max = 900) that:
+	•	Assumes correct is already logical.
+	•	Computes mean_accuracy across all trials (mean(correct, na.rm = TRUE)).
+	•	Filters to correct trials only with:
+	•	non-missing rt,
+	•	rt between rt_min and rt_max.
+	•	Computes mean_rt_correct from the filtered subset.
+	•	Returns a one-row data frame with columns:
+	•	mean_accuracy
+	•	mean_rt_correct.
+	•	Call summarize_behavior(exp_data) and print the result.
+	
+```{r}
+summarize_behavior <- function(data, rt_min = 300, rt_max = 900) {
+  data_filtered <- data[data$correct == TRUE &!is.na(data$rt) & data$rt >= rt_min & data$rt <= rt_max, ]
+  mean_accuracy <- mean(data$correct, na.rm = TRUE)
+  mean_rt_correct <- mean(data_filtered$rt, na.rm = TRUE)
+  result <- data.frame(mean_accuracy = mean_accuracy, mean_rt_correct = mean_rt_correct)
+  return(result)
+}
+summarize_behavior(exp_data) 
+```
+4.	Behavior by block
+	•	Using your cleaned exp_data, compute mean RT on correct trials (RT 300–900, na.rm = TRUE) by block.
+	•	You can reuse your filtering logic or use summarize_behavior in a loop / lapply.
+	•	In a short comment (1–2 sentences), explain why we:
+	•	Recover RTs before summarizing, and
+	•	Filter RTs to 300–900 ms and use correct trials only.
+```{r}
+data_filtered <- exp_data[exp_data$correct == TRUE &!is.na(exp_data$rt) & exp_data$rt >= 300 & exp_data$rt <= 900, ]
+mean_rts <- tapply(data_filtered$rt, data_filtered$block, mean)
+print(mean_rts)
+```
+
+
+
+
+
+File List 
+```{r}
+# Prefer a pattern to avoid accidentally pulling other CSVs
+file_list <- list.files(
+  here::here("data", "raw"),
+  pattern = "^est-experiment-.*\\.csv$",
+  full.names = FALSE
+)
+file_list
+```
+#### 2) Apply our participant processor ---------------------------------------
+```{r}
+ source(here::here("scripts/score_questionnaire.R"))
+  source(here::here("scripts/compute_rt_if_missing.R"))
+  source(here::here("scripts/summarize_behavior.R"))
+  source(here::here("scripts/process_participant.R"))
+participant_rows <- lapply(file_list, process_participant)
+
+```
+
+#### 3) Combine into one study-level data frame --------------------------------
+```{r}
+study_level <- do.call(rbind, participant_rows)
+```
+    

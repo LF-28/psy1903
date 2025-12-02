@@ -105,12 +105,13 @@ head(experiment_data)
 ```{r}
 experiment_data$rt_category_loop <- NA
 for (i in 1:nrow(experiment_data)) {
-  experiment_data[i, "rt_category_loop"] <- classify_rt(experiment_data[i, "rt"], 500) ##a loop using classify function to categorize rt as fast, slow, or unknown
+  experiment_data[i, "rt_category_loop"] <- classify_rt(experiment_data[i, "rt"], threshold = 500)
 }
+
 ```
 ###Q4.2 Vectorized Version
 ```{r}
-experiment_data$rt_category_vec <- classify_rt(experiment_data$rt, threshold = 500) #fill column with vecotrized version and classify_rt function
+experiment_data$rt_category_vec <- classify_rt(experiment_data$rt, threshold = 500)
 ```
 ##Q4.3
 ```{r}
@@ -159,6 +160,12 @@ with(experiment_data, table(condition, is.na(rt)))
 ```
 #### Q7: Using AI for Debugging or Refactoring -----------------------
 ##Q7.1 Buggy Code
+
+This is totally correct based on the videos and notes, but I later learned that in updated R, tapply can actually now take the na.rm = TRUE flag directly, so moving forward you can ignore the anonymous function and simplify to:
+subject_means <- tapply(experiment_data$rt,
+experiment_data$condition,
+mean,
+na.rm = TRUE)
 ```{r}
 # subject_means <- tapply(experiment_data$rt,
 #                         experiment_data$condition,

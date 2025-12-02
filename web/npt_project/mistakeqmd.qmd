@@ -1,0 +1,160 @@
+---
+title: "npt_project"
+format: html
+editor: visual
+---
+
+## Quarto
+
+Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
+
+## Running Code
+
+When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
+
+```{r}
+1 + 1
+```
+
+You can add options to executable code like this
+
+```{r}
+#| echo: false
+2 * 2
+```
+
+The `echo: false` option disables the printing of code (only output is displayed).
+
+```{r}
+install.packages("jsonlite")
+library(jsonlite)
+
+```
+
+```{r}
+participant_data <- read.csv("/Users/efried/Desktop/psy1903/web/npt_project/data/raw/npt-experiment-2025-11-05-10-33-05.csv")
+
+```
+
+```{r}
+head(participant_data)
+str(participant_data)
+```
+
+```{r}
+#### score_questionnaire.R -----------------------------------------------------
+## Purpose: Take a JSON string from the questionnaire row and return a single score.
+## Scale: jsPsychSurveyLikert default 0–4. Reverse items: 2, 4, 7.
+
+## 1) Parse the JSON string into an R object
+##    Use jsonlite::fromJSON() to convert the text into a list.
+## Example:
+responses <- fromJSON(participant_data[participant_data$trialType == "questionnaire", "response"])
+
+
+```
+
+```{r}
+## 2) Flatten and convert to numeric
+##    Use unlist() to turn the list into a vector and coerce to numeric if needed.
+## Example:
+responses <- as.numeric(unlist(responses))
+
+## 3) Reverse-score the specified items
+rev_items <- c(2, 4, 7)
+responses[rev_items] <- 4 - responses[rev_items]
+
+
+```
+
+```{r}
+## 5) Compute the final score
+mean_score <- mean(responses, na.rm = TRUE)
+```
+
+```{r}
+#### Score Behavioral Data ------------------------------------
+## Change correct correct to logical
+participant_data$correct <- as.logical(participant_data$correct)
+## Separate data into block and trial types
+practice_filtered  <- participant_data[participant_data$block == "practice", ]
+magnitude_filtered <- participant_data[participant_data$block == "experiment" & participant_data$trial_type == "magnitude", ]
+parity_filtered    <- participant_data[participant_data$block == "experiment" & participant_data$trial_type == "parity", ]
+  
+```
+
+```{r}
+## Filter out unreasonable reaction times (keep 250–900 ms)
+practice_filtered  <- practice_filtered[practice_filtered$rt  >= 250 & practice_filtered$rt  <= 900, ]
+magnitude_filtered <- magnitude_filtered[magnitude_filtered$rt >= 250 & magnitude_filtered$rt <= 900, ]
+parity_filtered    <- parity_filtered[parity_filtered$rt    >= 250 & parity_filtered$rt    <= 900, ]
+```
+
+```{r}
+## Calculate mean reaction time and accuracy for each trial type
+practice_mean_rt  <- mean(practice_filtered$rt, na.rm = TRUE)
+practice_acc      <- mean(practice_filtered$correct, na.rm = TRUE)
+magnitude_mean_rt <- mean(magnitude_filtered$rt, na.rm = TRUE)
+magnitude_acc     <- mean(magnitude_filtered$correct, na.rm = TRUE)
+parity_mean_rt    <- mean(parity_filtered$rt, na.rm = TRUE)
+parity_acc        <- mean(parity_filtered$correct, na.rm = TRUE)
+```
+
+```{r}
+## Calculate standard deviation of reaction times for each trial type
+practice_sd_rt  <- sd(practice_filtered$rt, na.rm = TRUE)
+magnitude_sd_rt <- sd(magnitude_filtered$rt, na.rm = TRUE)
+parity_sd_rt    <- sd(parity_filtered$rt, na.rm = TRUE)
+```
+
+```{r}
+file_path  <- "psy1903/web/npt_project/data/raw/npt-experiment-2025-11-05-12-34-56.csv"
+subject_id <- sub("\\.csv$", "", basename(file_path))
+```
+
+```{r}
+participant_summary <- data.frame(
+  subject_id         = subject_id,
+  tef10_score        = mean_score,                  
+  practice_mean_rt   = practice_mean_rt,
+  practice_acc       = practice_acc,
+  magnitude_mean_rt  = magnitude_mean_rt,
+  magnitude_acc      = magnitude_acc,
+  parity_mean_rt     = parity_mean_rt,
+  parity_acc         = parity_acc,
+  practice_sd_rt     = practice_sd_rt,
+  magnitude_sd_rt    = magnitude_sd_rt,
+  parity_sd_rt       = parity_sd_rt,
+  stringsAsFactors   = FALSE
+)
+
+participant_summary
+```
+
+```{r}
+# Questionnaire score within expected range (allowing NA)
+mean_score
+is.numeric(mean_score)
+
+# RTs were filtered as intended (spot check ranges)
+practice_mean_rt; magnitude_mean_rt; parity_mean_rt
+
+# Accuracy is a proportion between 0 and 1
+practice_acc; magnitude_acc; parity_acc
+
+# The summary is exactly one row
+nrow(participant_summary) == 1
+
+# Optional: check for missing values you expect or need to handle
+anyNA(participant_summary)
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+Users/efried/Desktop/psy1903/web/npt_project
