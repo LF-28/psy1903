@@ -1,0 +1,48 @@
+---
+title: "ai-refactor.qmd"
+author: "Eliza Fried"
+format: html
+editor: visual
+---
+
+## Original Issues
+
+-   There are several bugs in the original files, with typos and mismatches across functions and scripts that cause issues when trying to process participant data. Besides functional issues, there are places where code is not optimized, whether that be because it is not coded with best practices, or because the code is not actually needed or used later.
+
+## My Refactoring
+
+-   I made two optimization changes in summarize behavior
+
+    -   Firstly, I subset the valid_data using column names instead of indexing with column positions—and generally changed it from being hard-coded to dynamic and easier to re-use (using parameters). This also makes it clearer to yourself and others what this line of code is doing, because it references names instead of positions (which means you have to look at what the 12th column is)
+
+    -   Secondly, I noticed that there was a loop for centering RTs. At first, I was thinking about vectorizing it. To do that, though, I was trying to understand what it did for processing the information, and realized it was never used again so I got rid of it altogether.
+
+-   I refactored in build_participant_wide.R
+
+    -   I changed the loop that ran all the subject files through import_and_process and compiled them into a single row list of all of the relevant data. I vectorized this by using lapply, which applies this logic to the whole folder instead of looping through more slowly. This made the code more efficient, and clearer.
+
+## ChatGPT Recommendations on Original File
+
+I gave ChatGPT the project2.zip file along with the first example prompt. This was it's output:
+
+1.  build_participant_wide and import_and_process have a mismatch in how path and filenames that will prevent connection errors
+2.  hardcoding in summarize behavior with data\[,3\] and using 300 and 900 hardcoded, instead of using the function parameters
+3.  vectorized version of the RT-centering loop
+4.  fix internal consistency of column names and condition labels (makes NA outputs in summarize_behavior)
+5.  separate the parts of import_and_process that does computation and writes CSV disk
+
+## ChatGPT Recommendations on Refactored File
+
+-   desired order is defined in both summarize_behavior and calculate_iat_dscore
+
+-   make file-writing optional in import_and_process to make debugging, unit testing, and re-running easier.
+
+-   consolidate/relocate helper functions like normalize logical() to one place for reuse/testing
+
+-   handle 0/\>1 rows explicitly when extracting questionnaire data
+
+-   can streamline subsetting for valid data in summarize_behavior, so subset once for valid RT range and reuse for both RT and accuracy subsets
+
+## Comparison
+
+A lot of AI's recommendations for the original code were bug-fixes that I completed earlier (path/fileneames, a missing "as" in column names, an "and" instead of an "or") even though it claimed it gave just style/clarity feedback, and hinted at bugs it saw and could point out. I think that does make sense, because a lot of the bugs it pointed out were kind of clarity problems, in the sense that inconsistency was the issue. It also pointed out the summarize_behavior filtering that used numbers and hard-coding instead of names and dynamic practices. We both had the idea of vectorizing the RT-centering loop, but while I concluded it would be best to get rid of it as it was serving no purpose, AI just gave a vectorized version of the loop. It had the information from other files that this didn't become relevant, but it didn't recommend getting rid of it. This shows that it won't always identify to you actual best practices. The last of it's original recommendations was to separate the one-row summary import_and_process outputs from the CSVS file writing (which would be in build_participant_wide) to optionally writes all participant files or one combined file. I hadn't thought about that, and I think it would have made debugging a little easier, and easier to reuse. After debugging and refactoring, it made improvements that really improved clarity and debugging practices, I think. These were varied in how necessary they are, but they shortened code more and divided functions up more. I don't think separating all minor helper functions is greatly necessary (like normalize_logical), but it might make future projects and readability easier.

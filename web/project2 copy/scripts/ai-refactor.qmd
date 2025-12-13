@@ -1,0 +1,16 @@
+---
+title: "ai-refactor.qmd"
+format: html
+editor: visual
+---
+
+## Quarto
+
+Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
+
+## ChatGPT recommendations
+
+I gave ChatGPT the project2.zip file along with the first example prompt. This was it's output:
+
+1.  build_participant_wide and import_and_process have a mismatch in how path and filenames that will prevent connection errors
+2.  hardcoding in summarize behavior with data\[,3\] and using 300 and 900 hardcoded, instead of using the function parameters
